@@ -98,7 +98,6 @@ public class Passwy extends SimpleActivity {
                 generate(v);
             }
         });
-        btnGenerate.setOnClickListener(this);
     }
 
     @Override
