@@ -20,10 +20,14 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,8 +50,9 @@ import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
 import de.psdev.licensesdialog.model.Notice;
 import de.psdev.licensesdialog.model.Notices;
+import jlelse.simpleui.SimpleActivity;
 
-public class Passwy extends AppCompatActivity implements View.OnClickListener {
+public class Passwy extends SimpleActivity {
 
     EditText phrase1, phrase2, pwLength;
     CheckBox specChars;
@@ -57,7 +62,29 @@ public class Passwy extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.passwy);
+
+        initToolbar(true, DEFAULT_TOOLBAR_COLOR);
+        initFab(true, getResources().getDrawable(R.drawable.github), DEFAULT_FAB_COLOR, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse("https://github.com/jlelse/Passwy"));
+                startActivity(i);
+            }
+        });
+        initDrawer(true, R.menu.drawer, new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.start:
+                        getDrawerLayout().closeDrawers();
+                        break;
+                }
+                return true;
+            }
+        }, null);
 
         phrase1 = (EditText) findViewById(R.id.pw);
         phrase2 = (EditText) findViewById(R.id.pwrep);
@@ -65,18 +92,13 @@ public class Passwy extends AppCompatActivity implements View.OnClickListener {
         specChars = (CheckBox) findViewById(R.id.checkbox_chars);
         loadingIndicator = (AVLoadingIndicatorView) findViewById(R.id.progressBar);
         btnGenerate = (Button) findViewById(R.id.button_show);
-        btnGenerate.setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button_show:
+        btnGenerate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 generate(v);
-                break;
-            default:
-                break;
-        }
+            }
+        });
+        btnGenerate.setOnClickListener(this);
     }
 
     @Override
@@ -246,7 +268,5 @@ public class Passwy extends AppCompatActivity implements View.OnClickListener {
             Snackbar.make(view, R.string.enter_length, Snackbar.LENGTH_SHORT).show();
         }
     }
-
-
 }
 
