@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
@@ -44,6 +44,7 @@
                 android:id="@+id/pw"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:focusable="false"
                 android:hint="@string/phrase"
                 android:inputType="textPassword"
                 android:typeface="monospace" />
@@ -57,6 +58,7 @@
                 android:id="@+id/pwrep"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:focusable="false"
                 android:hint="@string/phrase_rep"
                 android:inputType="textPassword"
                 android:typeface="monospace" />
@@ -70,6 +72,7 @@
                 android:id="@+id/pwlen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:focusable="false"
                 android:hint="@string/pwlen"
                 android:inputType="number"
                 android:typeface="monospace" />
@@ -88,6 +91,12 @@
             android:layout_height="wrap_content"
             android:text="@string/show" />
 
+        <Button
+            android:id="@+id/direct_copy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/copy_direct" />
+
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -98,4 +107,4 @@
             app:indicator="BallGridPulse"
             app:indicator_color="@color/accent" />
     </LinearLayout>
-</ScrollView>
+</android.support.v4.widget.NestedScrollView>

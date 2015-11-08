@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_launcher"
         android:title="@string/app_name" />
 
+    <item
+        android:id="@+id/github"
+        android:icon="@drawable/github"
+        android:title="@string/github" />
+
 </menu>

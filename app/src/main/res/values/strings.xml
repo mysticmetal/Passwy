@@ -30,5 +30,7 @@
     <string name="phr_doesnt_match">Phrases doesn\'t match!</string>
     <string name="enter_length">Please enter the length!</string>
     <string name="licenses">Licenses</string>
+    <string name="github">Passwy on GitHub</string>
+    <string name="copy_direct">Generate and copy secretly to clipboard</string>
 
 </resources>

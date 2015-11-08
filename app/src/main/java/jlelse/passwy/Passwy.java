@@ -21,16 +21,15 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -57,7 +56,7 @@ public class Passwy extends SimpleActivity {
     EditText phrase1, phrase2, pwLength;
     CheckBox specChars;
     AVLoadingIndicatorView loadingIndicator;
-    Button btnGenerate;
+    Button btnGenerate, btnCopy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,21 +64,18 @@ public class Passwy extends SimpleActivity {
 
         setContentView(R.layout.passwy);
 
-        initToolbar(true, DEFAULT_TOOLBAR_COLOR);
-        initFab(true, getResources().getDrawable(R.drawable.github), DEFAULT_FAB_COLOR, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("https://github.com/jlelse/Passwy"));
-                startActivity(i);
-            }
-        });
+        setToolbarEnabled(true);
         initDrawer(true, R.menu.drawer, new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.start:
                         getDrawerLayout().closeDrawers();
+                        break;
+                    case R.id.github:
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse("https://github.com/jlelse/Passwy"));
+                        startActivity(i);
                         break;
                 }
                 return true;
@@ -87,15 +83,46 @@ public class Passwy extends SimpleActivity {
         }, null);
 
         phrase1 = (EditText) findViewById(R.id.pw);
+        phrase1.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
         phrase2 = (EditText) findViewById(R.id.pwrep);
+        phrase2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
         pwLength = (EditText) findViewById(R.id.pwlen);
+        pwLength.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
         specChars = (CheckBox) findViewById(R.id.checkbox_chars);
         loadingIndicator = (AVLoadingIndicatorView) findViewById(R.id.progressBar);
         btnGenerate = (Button) findViewById(R.id.button_show);
         btnGenerate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                generate(v);
+                generate(v, false);
+            }
+        });
+        btnCopy = (Button) findViewById(R.id.direct_copy);
+        btnCopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                generate(v, true);
             }
         });
     }
@@ -112,6 +139,7 @@ public class Passwy extends SimpleActivity {
             case R.id.licenses:
                 Notices notices = new Notices();
 
+                notices.addNotice(new Notice("SimpleUI", "https://github.com/jlelse/SimpleUI", "Jan-Lukas Else", new ApacheSoftwareLicense20()));
                 notices.addNotice(new Notice("AVLoadingIndicatorView", "https://github.com/81813780/AVLoadingIndicatorView", "Jack Wang", new ApacheSoftwareLicense20()));
                 notices.addNotice(new Notice("NineOldAndroids", "https://github.com/JakeWharton/NineOldAndroids", "Jake Wharton", new ApacheSoftwareLicense20()));
 
@@ -196,7 +224,7 @@ public class Passwy extends SimpleActivity {
         return messageDigest.digest();
     }
 
-    public void generate(final View view) {
+    public void generate(final View view, final boolean secretCopy) {
         final String phrase = phrase1.getText().toString();
         String phraseRep = phrase2.getText().toString();
         final boolean characters = specChars.isChecked();
@@ -219,6 +247,14 @@ public class Passwy extends SimpleActivity {
             if (phraseRep.equals(phrase) || phraseRep.equals("")) {
                 loadingIndicator.setVisibility(View.VISIBLE);
                 btnGenerate.setEnabled(false);
+                btnCopy.setEnabled(false);
+                specChars.setEnabled(false);
+                phrase1.setEnabled(false);
+                phrase2.setEnabled(false);
+                pwLength.setEnabled(false);
+                phrase1.setFocusable(false);
+                phrase2.setFocusable(false);
+                pwLength.setFocusable(false);
 
                 new Thread(new Runnable() {
                     public void run() {
@@ -231,28 +267,44 @@ public class Passwy extends SimpleActivity {
                                 @Override
                                 public void run() {
                                     btnGenerate.setEnabled(true);
+                                    btnCopy.setEnabled(true);
+
+                                    specChars.setEnabled(true);
+
                                     loadingIndicator.setVisibility(View.GONE);
 
-                                    new AlertDialog.Builder(Passwy.this)
-                                            .setTitle(R.string.app_name)
-                                            .setMessage(pw)
-                                            .setPositiveButton(R.string.hide, new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    dialog.dismiss();
-                                                }
-                                            })
-                                            .setNeutralButton(R.string.copy, new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                                    ClipData clip = ClipData.newPlainText(getResources().getString(R.string.app_name), pw);
-                                                    clipboard.setPrimaryClip(clip);
+                                    phrase1.setEnabled(true);
+                                    phrase2.setEnabled(true);
+                                    pwLength.setEnabled(true);
 
-                                                    Snackbar.make(view, R.string.copied, Snackbar.LENGTH_SHORT).show();
-                                                }
-                                            })
-                                            .show();
+                                    if (secretCopy) {
+                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.app_name), pw);
+                                        clipboard.setPrimaryClip(clip);
+
+                                        Snackbar.make(view, R.string.copied, Snackbar.LENGTH_SHORT).show();
+                                    } else {
+                                        new AlertDialog.Builder(Passwy.this)
+                                                .setTitle(R.string.app_name)
+                                                .setMessage(pw)
+                                                .setPositiveButton(R.string.hide, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                })
+                                                .setNeutralButton(R.string.copy, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                                        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.app_name), pw);
+                                                        clipboard.setPrimaryClip(clip);
+
+                                                        Snackbar.make(view, R.string.copied, Snackbar.LENGTH_SHORT).show();
+                                                    }
+                                                })
+                                                .show();
+                                    }
                                 }
                             });
                         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
